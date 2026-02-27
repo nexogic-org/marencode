@@ -51,6 +51,31 @@ Maren Code 是一款极致轻量化的全自动 AI 编程 CLI Agent。你只需�
 
 ```
 
+## 核心工作流
+
+```mermaid
+graph TD
+    User(用户输入需求) --> Chatter
+    Chatter(Chatter 确认细节) --> Leader
+    Leader(Leader 拆解任务) -->|逐个分发| Coder
+    Coder(Coder 开发) -->|需要图片| Designer(Designer 生成资源)
+    Designer --> Coder
+    Coder -->|交付代码| LeaderIntegrate(Leader 整合)
+    LeaderIntegrate -->|下发需求与测试要求| Tester
+    Tester(Tester 测试并输出报告) --> LeaderCheck{Leader 验收}
+    LeaderCheck -->|通过| Done(完成)
+    LeaderCheck -->|不通过| Replan(Leader 重新拆任务)
+    Replan --> CoderFix(Coder 调试修复)
+    CoderFix --> Tester
+    
+    subgraph "自动修复循环"
+    Tester --> LeaderCheck
+    LeaderCheck --> Replan
+    end
+```
+
+**质量模式**最多循环 5 次，**节约模式**最多循环 3 次，直至无 Bug。
+
 ## 核心模式
 
 ### 交互式项目模式 (`run enter`)

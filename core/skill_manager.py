@@ -56,6 +56,61 @@ _SKILL_ALIASES = {
     "create": "create_file",
 }
 
+# 硬编码回退表：当 skill.json 缺失或 module 字段错误时，直接用已知的正确 module/function
+_SKILL_FALLBACK = {
+    "run_command":      ("core.skill.terminal",     "run_command"),
+    "read_file":        ("core.skill.read_file",    "read_file"),
+    "list_dir":         ("core.skill.read_file",    "list_dir"),
+    "write_file":       ("core.skill.write_file",   "write_file"),
+    "edit_file":        ("core.skill.edit_file",    "edit_file"),
+    "edit_file_lines":  ("core.skill.edit_file",    "edit_file_lines"),
+    "rename_file":      ("core.skill.file_ops",     "rename_file"),
+    "create_directory": ("core.skill.file_ops",     "create_directory"),
+    "create_file":      ("core.skill.file_ops",     "create_file"),
+    "read_url":         ("core.skill.get_website",  "get_website"),
+    "search_web":       ("core.skill.get_web_info", "search_web"),
+    "search_github":    ("core.skill.get_github",   "search_github"),
+    "get_time":         ("core.skill.get_time",     "get_current_time"),
+    "get_timestamp":    ("core.skill.get_time",     "get_timestamp"),
+    "add_memory":       ("core.skill.memory",       "add_memory"),
+}
+
+
+def _resolve_skill(skill_name: str):
+    """
+    解析技能名称 → (resolved_name, module_name, function_name)
+    优先 skill.json，再别名，最后硬编码回退表
+    """
+    skills = load_skills()
+
+    # 第一步：直接匹配 skill.json
+    cfg = next((s for s in skills if s['name'] == skill_name), None)
+
+    # 第二步：别名 → 再查 skill.json
+    resolved = skill_name
+    if not cfg and skill_name in _SKILL_ALIASES:
+        resolved = _SKILL_ALIASES[skill_name]
+        cfg = next((s for s in skills if s['name'] == resolved), None)
+
+    if cfg:
+        mod = cfg.get("module")
+        func = cfg.get("function")
+        if mod and func:
+            return resolved, mod, func
+
+    # 第三步：硬编码回退表（skill.json 缺失或 module 字段错误时兜底）
+    fallback_key = resolved if resolved in _SKILL_FALLBACK else skill_name
+    if fallback_key in _SKILL_FALLBACK:
+        mod, func = _SKILL_FALLBACK[fallback_key]
+        logging.info(f"技能回退: '{skill_name}' -> {mod}.{func}")
+        return fallback_key, mod, func
+
+    available = [s['name'] for s in skills]
+    raise ValueError(
+        f"技能 '{skill_name}' 未找到。"
+        f"可用: {', '.join(available) if available else '(空)'}"
+    )
+
 
 def execute_skill(skill_name: str, **kwargs):
     """
@@ -64,59 +119,17 @@ def execute_skill(skill_name: str, **kwargs):
     :param kwargs: 传递给技能函数的参数
     :return: 技能执行结果
     """
-    skills = load_skills()
-
-    # 第一步：直接匹配
-    skill_config = next(
-        (s for s in skills if s['name'] == skill_name), None
-    )
-
-    # 第二步：别名回退（AI 常输出变体名称如 run_shell、shell 等）
-    resolved_name = skill_name
-    if not skill_config and skill_name in _SKILL_ALIASES:
-        resolved_name = _SKILL_ALIASES[skill_name]
-        logging.info(
-            f"技能别名解析: '{skill_name}' -> '{resolved_name}'"
-        )
-        skill_config = next(
-            (s for s in skills if s['name'] == resolved_name), None
-        )
-
-    if not skill_config:
-        available = [s['name'] for s in skills]
-        if not available:
-            from core.runtime_dir import get_runtime_dir
-            cfg_dir = os.path.join(
-                get_runtime_dir(), ".maren", "skill.json"
-            )
-            raise ValueError(
-                f"技能 '{skill_name}' 未找到: "
-                f"skill.json 为空或不存在 ({cfg_dir})"
-            )
-        raise ValueError(
-            f"技能 '{skill_name}' 未找到。"
-            f"可用: {', '.join(available)}"
-        )
-
-    module_name = skill_config.get("module")
-    function_name = skill_config.get("function")
-
-    if not module_name or not function_name:
-        raise ValueError(
-            f"技能 '{resolved_name}' 缺少 module/function 定义。"
-        )
+    resolved_name, module_name, function_name = _resolve_skill(skill_name)
 
     try:
         module = importlib.import_module(module_name)
         func = getattr(module, function_name)
 
-        # 只传递函数签名中存在的参数
         sig = inspect.signature(func)
         valid_kwargs = {
             k: v for k, v in kwargs.items()
             if k in sig.parameters
         }
-
         return func(**valid_kwargs)
     except ImportError as e:
         raise RuntimeError(

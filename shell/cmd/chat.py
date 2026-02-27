@@ -19,6 +19,20 @@ def _flush_input():
         while msvcrt.kbhit():
             msvcrt.getch()
 
+def _print_tool_result(action: str, result_str: str):
+    """打印工具执行结果给用户看"""
+    DIM = Fore.LIGHTBLACK_EX
+    R = Style.RESET_ALL
+    if result_str.startswith("[OK]"):
+        icon = f"{Fore.GREEN}✓{R}"
+    elif result_str.startswith("[ERROR]"):
+        icon = f"{Fore.RED}✗{R}"
+    else:
+        icon = f"{Fore.CYAN}→{R}"
+    first_line = result_str.split("\n")[0][:120]
+    print(f"  {icon} {DIM}[{action}]{R} {first_line}")
+
+
 def _load_chatter_config():
     # 读取本地配置并校验必填字段，支持角色独立 base_url
     if not inited.is_inited():
@@ -243,6 +257,8 @@ def run(message: str):
                 if len(result_str) > 8000:
                     result_str = result_str[:8000] + "...(truncated)"
                 
+                _print_tool_result(action, result_str)
+                
                 sys_msg = f"工具 ({action}) 执行结果：\n\n{result_str}\n\n请根据以上结果回答用户刚才的问题。"
                 temp_history.append({"role": "system", "content": sys_msg})
                 
@@ -328,6 +344,8 @@ def enter():
                             result_str = str(result)
                             if len(result_str) > 8000:
                                 result_str = result_str[:8000] + "...(truncated)"
+                            
+                            _print_tool_result(action, result_str)
                                 
                             sys_msg = f"工具 ({action}) 执行结果：\n\n{result_str}\n\n请根据以上结果回答用户的问题。"
                             

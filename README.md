@@ -26,29 +26,37 @@ Maren Code is a lightweight, fully automated AI programming CLI agent. You give 
 
 No GUI. No manual steps. Pure CLI efficiency.
 
-```bash
-
-  ███╗   ███╗ █████╗ ██████╗ ███████╗███╗   ██╗   ██████╗ ██████╗ ██████╗ ███████╗
-  ████╗ ████║██╔══██╗██╔══██╗██╔════╝████╗  ██║  ██╔════╝██╔═══██╗██╔══██╗██╔════╝
-  ██╔████╔██║███████║██████╔╝█████╗  ██╔██╗ ██║  ██║     ██║   ██║██║  ██║█████╗
-  ██║╚██╔╝██║██╔══██║██╔══██╗██╔══╝  ██║╚██╗██║  ██║     ██║   ██║██║  ██║██╔══╝
-  ██║ ╚═╝ ██║██║  ██║██║  ██║███████╗██║ ╚████║  ╚██████╗╚██████╔╝██████╔╝███████╗
-  ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
-  ──────────────────────────────────────────────────────────────────────────────────
-
-             ᓚᘏᗢ Maren Automatically Runs Executable Navigation Code
-
-  Version  2026.2.0.0    Author  Nexogic AI Team    Status  ✓ Ready    License  MIT
-  ──────────────────────────────────────────────────────────────────────────────────
-
->> run enter
-
-  ══════════════════════════════════════════════════════════
-  ᓚᘏᗢ Maren Code · Project Dialog
-  Project: maren    Session: 738c1c72
-  ══════════════════════════════════════════════════════════
-  /new  New session  |  /list  List  |  /switch <id>  Switch  |  exit  Quit
 ```
+  ✓ [👑 Leader]  Planning complete — 4 tasks
+  ⟳ [⌨ Coder]   #1 Project scaffold        ██████████░░ 75%
+  ⟳ [⌨ Coder]   #2 Auth module
+  ⟳ [🔍 Tester]  #3 Unit tests
+```
+
+## Core Workflow
+
+```mermaid
+graph TD
+    User(User Input) --> Chatter
+    Chatter(Chatter Confirms Details) --> Leader
+    Leader(Leader Decomposes Tasks) -->|Assign One by One| Coder
+    Coder(Coder Develops) -->|Needs Image| Designer(Designer Generates Assets)
+    Designer --> Coder
+    Coder -->|Delivers Code| LeaderIntegrate(Leader Integrates)
+    LeaderIntegrate -->|Sends Requirements & Test Criteria| Tester
+    Tester(Tester Tests & Reports) --> LeaderCheck{Leader Acceptance}
+    LeaderCheck -->|Pass| Done(Done)
+    LeaderCheck -->|Fail| Replan(Leader Replans)
+    Replan --> CoderFix(Coder Debugs & Fixes)
+    CoderFix --> Tester
+    
+    subgraph "Auto-Fix Loop"
+    Tester --> LeaderCheck
+    LeaderCheck --> Replan
+    end
+```
+
+**Quality Mode** loops up to 5 times, **Saving Mode** up to 3 times, until bug-free.
 
 ## Core Modes
 
