@@ -228,6 +228,22 @@ def _extract_tool_json(reply):
     return None
 
 
+def _print_tool_result(action: str, result_str: str):
+    """打印工具执行结果给用户看"""
+    DIM = Fore.LIGHTBLACK_EX
+    R = Style.RESET_ALL
+    # 判断成功/失败
+    if result_str.startswith("[OK]"):
+        icon = f"{Fore.GREEN}✓{R}"
+    elif result_str.startswith("[ERROR]"):
+        icon = f"{Fore.RED}✗{R}"
+    else:
+        icon = f"{Fore.CYAN}→{R}"
+    # 截取首行作为摘要
+    first_line = result_str.split("\n")[0][:120]
+    print(f"  {icon} {DIM}[{action}]{R} {first_line}")
+
+
 def _try_execute_tool(reply, history, base_url, api_key, model_name, lang, tracker, project_name):
     """
     多轮工具调用循环（最多 5 轮）
@@ -263,6 +279,9 @@ def _try_execute_tool(reply, history, base_url, api_key, model_name, lang, track
             break
 
         ever_executed = True
+
+        # 打印工具执行结果给用户看
+        _print_tool_result(action, result_str)
 
         # 将本轮 AI 回复和工具结果追加到历史
         history.append({"role": "assistant", "content": current_reply})
@@ -482,15 +501,15 @@ def _write_files(blocks: list):
 
 
 def run(message: str):
-    """执行 run 命令 — 只支持 run enter 交互模式"""
+    """执行 run 命令 — 必须使用 run enter"""
     init(autoreset=True)
 
-    # run enter 或直接 run 都进入交互模式
-    if not message or message.strip().lower() == "enter":
+    # 只接受 "enter" 参数
+    if message and message.strip().lower() == "enter":
         enter()
         return
 
-    # 其他输入提示用户使用 run enter
-    print(f"{prefix()}{Fore.YELLOW}run 命令已改为仅支持交互模式。{Style.RESET_ALL}")
+    # 其他任何输入（包括空输入）都提示必须用 run enter
+    print(f"{prefix()}{Fore.YELLOW}run 命令必须搭配 enter 使用。{Style.RESET_ALL}")
     print(f"{prefix()}请使用 {Fore.GREEN}run enter{Style.RESET_ALL} 进入项目对话模式。")
     print(f"{prefix()}如需全自动编程，请使用 {Fore.GREEN}new <需求描述>{Style.RESET_ALL}。")

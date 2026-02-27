@@ -117,13 +117,13 @@ def main_maren():
                 run_msg = " ".join(args[1:])
                 run_cmd.run(run_msg)
             else:
-                print(f"{prefix()}Usage: code run <需求描述> | code run enter")
+                print(f"{prefix()}Usage: code run enter")
         elif head == "run":
             if args:
                 run_msg = " ".join(args)
                 run_cmd.run(run_msg)
             else:
-                print(f"{prefix()}Usage: run <需求描述> | run enter")
+                print(f"{prefix()}请使用 {Fore.GREEN}run enter{Style.RESET_ALL} 进入项目对话模式。")
         elif head == "hello" or (head == "code" and args and args[0].lower() == "hello"):
             hello_cmd.run()
         elif head == "config" or (head == "code" and args and args[0].lower() == "config"):
@@ -148,7 +148,6 @@ def main_maren():
              print(f"{prefix()}Available commands:")
              print(f"  {Fore.GREEN}code init boot{Style.RESET_ALL}   Initialize Maren Code")
              print(f"  {Fore.GREEN}new <desc>{Style.RESET_ALL}       Full auto pipeline (Chatter→Leader→Coder→Tester)")
-             print(f"  {Fore.GREEN}code run <desc>{Style.RESET_ALL}  Auto-code with multi-agent")
              print(f"  {Fore.GREEN}run enter{Style.RESET_ALL}        Enter project dialog mode")
              print(f"  {Fore.GREEN}chat <msg>{Style.RESET_ALL}       Chat with Maren (one-shot)")
              print(f"  {Fore.GREEN}chat enter{Style.RESET_ALL}       Enter chat mode")
