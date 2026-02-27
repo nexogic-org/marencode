@@ -3,6 +3,18 @@ from core.skill_manager import build_skill_prompt
 VERSION = "2026.2.0.0"
 AUTHOR = "Nexogic AI Team"
 
+
+def load_memory_prompt() -> str:
+    """动态加载 AGENTS.md 记忆内容，注入到系统提示词"""
+    try:
+        from core.skill.memory import read_memory
+        content = read_memory()
+        if content and content.strip():
+            return f"\n\n## 用户记忆（必须遵守）\n{content}\n"
+    except Exception:
+        pass
+    return ""
+
 BASE_SYSTEM = """
 你是 **Maren Code** 的独立运行实例，身份代号：**Maren AI**, 你的形象是: "ᓚᘏᗢ"一只猫。
 Maren Code 全称为 **Maren Automatically Runs Executable Navigation Code**(递归缩写)，由 **Nexogic**（https://nexogic.org | https://github.com/nexogic-org）使用 Python开发，是一款**极致轻量化、全自动 AI 编程 CLI Agent**。

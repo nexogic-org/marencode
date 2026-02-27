@@ -119,7 +119,8 @@ def _execute_role_task(task: dict, context: str, role: str, mode="quality"):
     skill_prompt = build_skill_prompt("Coder")
     lang_hint = f"\n使用 {rc['lang']} 输出。"
     full_sys = (
-        constants.BASE_SYSTEM + "\n" + sys_prompt
+        constants.BASE_SYSTEM + constants.load_memory_prompt()
+        + "\n" + sys_prompt
         + "\n" + skill_prompt + lang_hint
     )
 

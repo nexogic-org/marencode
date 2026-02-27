@@ -1,11 +1,12 @@
 """
 shell/cmd/new.py — new 命令
-Leader 作为入口 → 优化提示词 → 拆分细小任务 → 逐个交给 Coder/Designer → Tester 测试 → Leader 总结修复 → 循环
+Chatter 收集需求 → Leader 总结优化提示词并拆分细小任务 → 逐个交给 Coder/Designer → Tester 测试 → Leader 总结修复 → 循环
 """
 from colorama import Fore, Style, init
 from shell.cmd import prefix
 from shell.cmd.config import get_mode, get_max_loops
 from pipeline import dashboard
+from pipeline.chatter import gather_requirements
 from pipeline.leader import plan_tasks, plan_bugfixes, summarize_project
 from pipeline.coder import execute_task, execute_designer_task
 from pipeline.tester import review_code
@@ -17,12 +18,11 @@ def _dispatch_task(task: dict, context: str, mode: str):
     if role == "designer":
         return execute_designer_task(task, context, mode)
     else:
-        # Coder 是默认角色，Leader/Tester 类型的任务也由 Coder 执行
         return execute_task(task, context, mode)
 
 
 def run(message: str):
-    """执行 new 命令 - Leader 主导的全流程自动化"""
+    """执行 new 命令 - Chatter→Leader→Coder/Designer→Tester 全流程自动化"""
     init(autoreset=True)
     if not message or not message.strip():
         print(f"{prefix()}{Fore.RED}请输入需求描述{Style.RESET_ALL}")
@@ -37,11 +37,23 @@ def run(message: str):
     print()
 
     # ══════════════════════════════════════════════
-    # Phase 1: Leader 接收需求，优化提示词，拆分细小任务
+    # Phase 1: Chatter 收集需求
     # ══════════════════════════════════════════════
-    dashboard.phase_start("leader", "正在分析需求、优化提示词并拆分任务...")
     try:
-        plan = plan_tasks(message.strip(), mode)
+        requirements = gather_requirements(message.strip())
+    except KeyboardInterrupt:
+        print(f"\n{prefix()}{Fore.YELLOW}已中断{Style.RESET_ALL}")
+        return
+
+    if not requirements:
+        print(f"{prefix()}{Fore.RED}需求收集失败{Style.RESET_ALL}")
+        return
+
+    # ══════════════════════════════════════════════
+    # Phase 2: Leader 总结优化提示词，拆分细小任务
+    # ══════════════════════════════════════════════
+    try:
+        plan = plan_tasks(requirements, mode)
     except KeyboardInterrupt:
         print(f"\n{prefix()}{Fore.YELLOW}已中断{Style.RESET_ALL}")
         return
@@ -62,7 +74,7 @@ def run(message: str):
     ])
 
     # ══════════════════════════════════════════════
-    # Phase 2: Leader 逐个将任务交给 Coder / Designer
+    # Phase 3: Leader 逐个将任务交给 Coder / Designer
     # ══════════════════════════════════════════════
     context = plan.get("summary", "")
     all_outputs = {}
@@ -94,7 +106,7 @@ def run(message: str):
         return
 
     # ══════════════════════════════════════════════
-    # Phase 3: Tester 测试 → Leader 总结 → 拆分修复 → Coder 修复 → 循环
+    # Phase 4: Tester 测试 → Leader 总结 → 拆分修复 → Coder 修复 → 循环
     # ══════════════════════════════════════════════
     for loop_i in range(1, max_loops + 1):
         dashboard.loop_info(loop_i, max_loops, mode)
@@ -145,7 +157,7 @@ def run(message: str):
         # 循环回到 Tester 再次测试
 
     # ══════════════════════════════════════════════
-    # Phase 4: Leader 总结项目
+    # Phase 5: Leader 总结项目
     # ══════════════════════════════════════════════
     try:
         summary = summarize_project(all_outputs, mode)

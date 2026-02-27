@@ -124,6 +124,50 @@ def _show(cfg):
     print()
 
 
+def _list_all_configs():
+    """列出 .maren/ 目录下所有配置文件及其内容摘要"""
+    maren_dir = inited.maren_dir_path()
+    if not os.path.isdir(maren_dir):
+        print(f"{prefix()}{Fore.RED}.maren/ 目录不存在{Style.RESET_ALL}")
+        return
+
+    print(f"\n{prefix()}{Style.BRIGHT}━━━ .maren/ 配置文件 ━━━{Style.RESET_ALL}")
+    print(f"  {Fore.LIGHTBLACK_EX}目录: {maren_dir}{Style.RESET_ALL}\n")
+
+    for name in sorted(os.listdir(maren_dir)):
+        fpath = os.path.join(maren_dir, name)
+        if not os.path.isfile(fpath):
+            continue
+        size = os.path.getsize(fpath)
+        icon = Fore.CYAN if name.endswith(".json") else Fore.LIGHTYELLOW_EX
+        print(f"  {icon}■{Style.RESET_ALL} {Style.BRIGHT}{name}{Style.RESET_ALL}"
+              f"  {Fore.LIGHTBLACK_EX}({size} bytes){Style.RESET_ALL}")
+
+        # JSON 文件显示 key 摘要
+        if name.endswith(".json"):
+            try:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if isinstance(data, dict):
+                    keys = list(data.keys())[:6]
+                    print(f"    {Fore.LIGHTBLACK_EX}keys: {', '.join(keys)}{Style.RESET_ALL}")
+                elif isinstance(data, list):
+                    print(f"    {Fore.LIGHTBLACK_EX}{len(data)} 项{Style.RESET_ALL}")
+            except Exception:
+                pass
+        # MD 文件显示前几行
+        elif name.endswith(".md"):
+            try:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    lines = f.readlines()
+                preview = [l.rstrip() for l in lines[:3] if l.strip()]
+                for line in preview:
+                    print(f"    {Fore.LIGHTBLACK_EX}{line[:60]}{Style.RESET_ALL}")
+            except Exception:
+                pass
+    print()
+
+
 def run(args):
     """config 命令入口"""
     if not args:
@@ -171,6 +215,9 @@ def run(args):
 
     elif sub == "danger":
         _handle_danger(args[1:], cfg)
+
+    elif sub == "list":
+        _list_all_configs()
 
     elif sub == "url":
         _handle_url(args[1:], cfg)
@@ -274,6 +321,7 @@ def _handle_danger(args, cfg):
 def _print_usage():
     print(f"{prefix()}可用子命令:")
     print(f"  {Fore.GREEN}config show{Style.RESET_ALL}                    查看配置")
+    print(f"  {Fore.GREEN}config list{Style.RESET_ALL}                    列出 .maren/ 下所有配置文件")
     print(f"  {Fore.GREEN}config mode quality|saving{Style.RESET_ALL}     设置模式")
     print(f"  {Fore.GREEN}config loops <1-10>{Style.RESET_ALL}            设置循环次数")
     print(f"  {Fore.GREEN}config model add|set|list|remove{Style.RESET_ALL}")

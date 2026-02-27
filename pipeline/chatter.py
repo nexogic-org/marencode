@@ -108,14 +108,17 @@ def gather_requirements(initial_msg: str):
         return None
     base_url, api_key, model_name, lang = cfg
     lang_hint = f"\n使用 {lang} 与用户交流。"
-    system = constants.BASE_SYSTEM + CHATTER_GATHER_PROMPT + lang_hint
+    system = constants.BASE_SYSTEM + constants.load_memory_prompt() + CHATTER_GATHER_PROMPT + lang_hint
     dashboard.phase_start("chatter", "正在与您交流需求细节...")
     history = []
     prompt = f"  {Fore.LIGHTMAGENTA_EX}you>{Style.RESET_ALL} "
 
     # 第一轮：AI 先分析用户的初始需求
-    cat = f"  {dashboard.CAT} "
-    print(cat, end="")
+    chatter_tag = (
+        f"  {dashboard.CAT}"
+        f" {Style.BRIGHT}{Fore.LIGHTMAGENTA_EX}[ Chatter ]{Style.RESET_ALL} "
+    )
+    print(chatter_tag, end="")
     reply = _call_chatter(base_url, api_key, model_name, system, history, initial_msg)
     _flush_input()
     history.append({"role": "user", "content": initial_msg})
@@ -136,7 +139,7 @@ def gather_requirements(initial_msg: str):
             # 用户主动结束，让 AI 总结
             user_input = "需求已经足够了，请输出完整需求文档。"
 
-        print(cat, end="")
+        print(chatter_tag, end="")
         reply = _call_chatter(base_url, api_key, model_name, system, history, user_input)
         _flush_input()
         history.append({"role": "user", "content": user_input})
@@ -146,7 +149,7 @@ def gather_requirements(initial_msg: str):
             return _parse_requirements(reply)
 
     # 超过最大轮次，强制总结
-    print(cat, end="")
+    print(chatter_tag, end="")
     force_msg = "请立即输出完整需求文档，使用 [REQUIREMENTS_DONE] 标记。"
     reply = _call_chatter(base_url, api_key, model_name, system, history, force_msg)
     dashboard.phase_done("chatter", "需求收集完成")

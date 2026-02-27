@@ -27,7 +27,7 @@ Maren Code is a lightweight, fully automated AI programming CLI agent. You give 
 No GUI. No manual steps. Pure CLI efficiency.
 
 ```bash
->> code run "Build a REST API with user authentication"
+>> run enter
 
   ═══════════════════════════════════════════════════════
   ᓚᘏᗢ Maren Code Multi-Agent Engine
@@ -41,27 +41,21 @@ No GUI. No manual steps. Pure CLI efficiency.
 
 ## Core Modes
 
-### 1. Fast Parallel Mode (`code run`)
-After the Leader plans the tasks, it builds a dependency graph and executes independent tasks **in parallel**, significantly speeding up generation. Ideal for clear requirements and efficiency.
+### Interactive Project Mode (`run enter`)
+**Recommended**. Enter a continuous conversation environment with context memory, supporting multi-turn instructions and slash commands.
 
-```
-User Input → 👑 Leader Plan → ⚡ Parallel Exec (Layer 1/2/3) → 📁 Output
-                              ├─ ⌨ Coder (Task A)
-                              ├─ ⌨ Coder (Task B)
-                              └─ ⌨ Coder (Task C)
+```bash
+run enter
 ```
 
-### 2. Full Quality Mode (`new`)
-Introduces **Chatter** for requirement analysis and **Tester** for code review, including an **automatic fix loop**. Ideal for complex projects or when code quality is a priority.
+Once in interactive mode, you can use:
+- `/new`: Create a new project session
+- `/list`: List all sessions
+- `/switch <id>`: Switch to a specific session
+- `exit`: Exit interactive mode
 
-```
-Chatter (Reqs) → Leader (Plan) → Coder (Exec) → Tester (Review) ──┐
-                                   ↑                          │
-                                   └───────(Auto Fix)─────────┘
-```
-
-### 3. Interactive Project Mode (`run enter`)
-Enter a continuous conversation environment with context memory, supporting multi-turn instructions and slash commands.
+### Other Modes
+Although the system supports single-command mode, it is strongly recommended to use `run enter` for better context understanding and project management.
 
 ## Quick Start
 
@@ -84,9 +78,7 @@ The setup wizard will guide you through configuring the API Base URL, model name
 
 | Command | Description |
 |---|---|
-| `code run <desc>` | **Parallel Mode**: Fast code generation |
-| `new <desc>` | **Quality Mode**: With analysis & fix loops |
-| `run enter` | **Interactive Mode**: Project dialog environment |
+| `run enter` | **Interactive Mode**: Project dialog environment (Core) |
 | `chat <msg>` | Single-shot chat (Chatter) |
 | `chat enter` | Enter pure chat mode |
 | `config show` | View current config |
@@ -94,15 +86,6 @@ The setup wizard will guide you through configuring the API Base URL, model name
 | `skill list` | List loaded skills |
 | `help` | Show all commands |
 | `exit` | Exit CLI |
-
-## Interactive Mode (`run enter`)
-
-Once in interactive mode, you can use:
-
-- `/new`: Create a new project session
-- `/list`: List all sessions
-- `/switch <id>`: Switch to a specific session
-- `exit`: Exit interactive mode
 
 ## AI Roles
 

@@ -45,7 +45,7 @@ def _call_role(role, system, msg, mode="quality"):
     if not rc:
         return f"[ERROR] {role} 配置缺失"
     lang_hint = f"\n使用 {rc['lang']} 输出。"
-    full_sys = constants.BASE_SYSTEM + "\n" + system + lang_hint
+    full_sys = constants.BASE_SYSTEM + constants.load_memory_prompt() + "\n" + system + lang_hint
     kwargs = {}
     if rc.get("temperature") is not None:
         kwargs["temperature"] = rc["temperature"]

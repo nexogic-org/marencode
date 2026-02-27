@@ -1,15 +1,16 @@
 import json
 import os
+from core.runtime_dir import get_runtime_dir
 
 def maren_dir_path():
-    return os.path.join(os.getcwd(), ".maren")
+    return os.path.join(get_runtime_dir(), ".maren")
 
 def maren_json_path():
     return os.path.join(maren_dir_path(), "maren.json")
 
 # 旧的 maren.json 路径（用于迁移检测）
 def old_maren_json_path():
-    return os.path.join(os.getcwd(), "maren.json")
+    return os.path.join(get_runtime_dir(), "maren.json")
 
 def skill_json_path():
     return os.path.join(maren_dir_path(), "skill.json")
@@ -83,7 +84,7 @@ def _create_default_project_json():
     """创建默认 project.json"""
     from datetime import datetime
     project = {
-        "name": os.path.basename(os.getcwd()),
+        "name": os.path.basename(get_runtime_dir()),
         "created": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "description": "",
         "version": "0.1.0"
@@ -100,9 +101,9 @@ def _create_default_project_json():
 def _create_default_role_skills_json():
     # 默认角色技能映射
     default_role_skills = {
-        "Chatter": ["read_url", "search_web", "get_time", "get_timestamp", "search_github", "read_file", "list_dir"],
-        "Coder": ["read_file", "list_dir", "write_file", "edit_file", "edit_file_lines", "rename_file", "create_directory", "create_file", "run_command", "search_web"],
-        "Designer": ["read_file", "list_dir", "write_file", "edit_file", "create_file", "create_directory", "search_web", "read_url"],
+        "Chatter": ["read_url", "search_web", "get_time", "get_timestamp", "search_github", "read_file", "list_dir", "add_memory"],
+        "Coder": ["read_file", "list_dir", "write_file", "edit_file", "edit_file_lines", "rename_file", "create_directory", "create_file", "run_command", "search_web", "add_memory"],
+        "Designer": ["read_file", "list_dir", "write_file", "edit_file", "create_file", "create_directory", "search_web", "read_url", "add_memory"],
         "Leader": ["read_file", "list_dir"],
         "Tester": ["read_file", "list_dir", "run_command"]
     }
@@ -292,6 +293,18 @@ def _create_default_skill_json():
                 "cwd": "工作目录（可选）",
                 "timeout": 30,
                 "msg": "正在执行命令..."
+            }
+        },
+        {
+            "name": "add_memory",
+            "description": "记住用户的长期规定或偏好（当用户说'记住'、'添加记忆'、'以后都要'等时调用）",
+            "roles": ["Chatter", "Coder"],
+            "module": "core.skill.memory",
+            "function": "add_memory",
+            "usage": {
+                "action": "add_memory",
+                "content": "要记住的内容",
+                "msg": "正在记录..."
             }
         }
     ]

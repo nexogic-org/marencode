@@ -99,7 +99,7 @@ def _load_project_name() -> str:
                 return name
     except Exception:
         pass
-    return os.path.basename(os.getcwd()) or "未命名项目"
+    return os.path.basename(get_runtime_dir()) or "未命名项目"
 
 
 # ── 会话类 ──
@@ -159,7 +159,7 @@ def _stream_reply(message, base_url, api_key, model_name, lang, history, tracker
     skill_prompt = build_skill_prompt("Coder")
     lang_hint = f"对话默认使用 {lang}，除非用户明确指定其他语言。"
     system_prompt = (
-        f"{constants.BASE_SYSTEM}\n{constants.CODER_SYSTEM}\n"
+        f"{constants.BASE_SYSTEM}{constants.load_memory_prompt()}\n{constants.CODER_SYSTEM}\n"
         f"{skill_prompt}\n{lang_hint}\n"
         f"当前项目: {project_name}"
     )
@@ -482,59 +482,15 @@ def _write_files(blocks: list):
 
 
 def run(message: str):
-    """执行 code run <描述> 一键全自动编程"""
+    """执行 run 命令 — 只支持 run enter 交互模式"""
     init(autoreset=True)
 
-    # 检查是否是 enter 命令
-    if message and message.strip().lower() == "enter":
+    # run enter 或直接 run 都进入交互模式
+    if not message or message.strip().lower() == "enter":
         enter()
         return
 
-    if not message or not message.strip():
-        print(f"{prefix()}{Fore.RED}[ERROR]{Style.RESET_ALL} 请输入需求描述。")
-        print(f"{prefix()}用法: code run <需求描述> | code run enter")
-        return
-
-    try:
-        result = run_pipeline(message.strip())
-    except KeyboardInterrupt:
-        print(f"\n{prefix()}{Fore.YELLOW}已中断{Style.RESET_ALL}")
-        return
-    except Exception as e:
-        import traceback
-        print(f"{prefix()}{Fore.RED}[ERROR] Pipeline 执行失败{Style.RESET_ALL}")
-        print(f"  {Fore.LIGHTBLACK_EX}类型: {type(e).__name__}{Style.RESET_ALL}")
-        print(f"  {Fore.LIGHTBLACK_EX}详情: {e}{Style.RESET_ALL}")
-        print(f"  {Fore.LIGHTBLACK_EX}堆栈: {traceback.format_exc()}{Style.RESET_ALL}")
-        return
-
-    if result.get("status") == "error":
-        print(f"{prefix()}{Fore.RED}{result.get('message', '未知错误')}{Style.RESET_ALL}")
-        return
-
-    # 提取并写入文件
-    all_files = []
-    for tid, r in result.get("results", {}).items():
-        output = r.get("output", "")
-        files = _parse_file_blocks(output)
-        all_files.extend(files)
-
-    if all_files:
-        print()
-        print(f"{prefix()}{Style.BRIGHT}生成文件:{Style.RESET_ALL}")
-        _write_files(all_files)
-    else:
-        # 没有文件块，直接渲染输出
-        print()
-        renderer = StreamRenderer()
-        for tid, r in sorted(result.get("results", {}).items()):
-            tag = role_tag(r.get("role", ""))
-            print(f"\n  {tag} 任务 #{tid}: {r.get('title', '')}")
-            divider("─", 50)
-            output = r.get("output", "")
-            renderer.feed(output + "\n")
-        tail = renderer.finalize()
-        if tail:
-            print(tail)
-
-    print(f"\n{prefix()}{Fore.GREEN}完成。{Style.RESET_ALL}")
+    # 其他输入提示用户使用 run enter
+    print(f"{prefix()}{Fore.YELLOW}run 命令已改为仅支持交互模式。{Style.RESET_ALL}")
+    print(f"{prefix()}请使用 {Fore.GREEN}run enter{Style.RESET_ALL} 进入项目对话模式。")
+    print(f"{prefix()}如需全自动编程，请使用 {Fore.GREEN}new <需求描述>{Style.RESET_ALL}。")
