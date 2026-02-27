@@ -1,0 +1,23 @@
+{
+    "model": {
+        "api_key": {
+            "coder": "a",
+            "leader": "a",
+            "tester": "a",
+            "icon_designer": "a"
+        },
+        "base_url": "https://xingjiabiapi.org/v1",
+        "coder": {
+            "model_name": "a"
+        },
+        "leader": {
+            "model_name": "a"
+        },
+        "tester": {
+            "model_name": "a"
+        },
+        "icon_designer": {
+            "model_name": "a"
+        }
+    }
+}
